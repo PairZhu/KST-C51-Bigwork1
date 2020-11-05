@@ -11,7 +11,10 @@ typedef unsigned char u8;
 typedef unsigned int u16;
 #endif
 
+#define PI 3.141592653589793
+
 sbit BUZZ = P1^6;
+
 u8 Total;
 double param_a_mm, param_b_mm, param_H_mm, param_M_g, param_g, Period;
 bit MeasureFlag = 0,	//测量完成标志
@@ -189,10 +192,11 @@ void readParam()
 
 void showTime()
 {
-	u8 num_len,str[20]={0};
+	u8 num_len,str[20];
 	while(!MeasureFlag)
 	{
 		num_len=uftoa(str,(50 * cnt50ms + (double)((TH0 << 8 | TL0) - (H50MS << 8 | L50MS)) * 0.001085)/1000,2);
+		str[num_len]='\0';
 		DISABLELED = 1;	//禁用,以免操作影响液晶屏
 		LcdShowStr(0,1,"t:");
 		LcdShowStr(2,1,str);
@@ -205,14 +209,24 @@ void showTime()
 
 void showResult()
 {
-	u8 num,str[20]={0};
-	double J_gcm2;
+	u8 num_len,str[20];
+	double J_gm2;
+	num_len=uftoa(str,Period,3);
+	str[num_len]='\0';
 	DISABLELED = 1;
-	num=uftoa(str,Period,3);
 	LcdClear();
 	LcdShowStr(0,0,"T=");
 	LcdShowStr(2,0,str);
-	LcdShowStr(2+num,0,"ms");
+	LcdShowStr(2+num_len,0,"ms");
+	P0=0xFF;
+	DISABLELED = 0;
+	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*10e9*param_H_mm);
+	num_len=uftoa(str,Period,4);
+	str[num_len]='\0';
+	DISABLELED = 1;
+	LcdShowStr(0,1,"J=");
+	LcdShowStr(2,1,str);
+	LcdShowStr(2+num_len,0,"g*m2");
 	P0=0xFF;
 	DISABLELED = 0;
 }

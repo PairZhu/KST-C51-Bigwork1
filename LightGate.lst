@@ -1,10 +1,10 @@
-C51 COMPILER V9.02   LIGHTGATE                                                             11/05/2020 23:08:28 PAGE 1   
+C51 COMPILER V9.02   LIGHTGATE                                                             11/05/2020 23:56:57 PAGE 1   
 
 
 C51 COMPILER V9.02, COMPILATION OF MODULE LIGHTGATE
 OBJECT MODULE PLACED IN LightGate.obj
-COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Hardware\LightGate.c BROWSE INCDIR(.\Hardware) DEBUG OBJECTEXTEND PRINT(.\L
-                    -ightGate.lst) OBJECT(LightGate.obj)
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Hardware\LightGate.c ROM(COMPACT) BROWSE INCDIR(.\Hardware) DEBUG OBJECTEXT
+                    -END PRINT(.\LightGate.lst) OBJECT(LightGate.obj)
 
 line level    source
 
@@ -40,7 +40,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    232    ----
+   CODE SIZE        =    231    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

@@ -1,9 +1,0 @@
-"main.obj",
-"KeyBoard.obj",
-"LCD1602.obj",
-"TimeCounter.obj",
-"LightGate.obj",
-"DigitalTube.obj" 
-TO "led" 
-RAMSIZE(256) 
-DISABLEWARNING (15) 

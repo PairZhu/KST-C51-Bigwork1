@@ -43,7 +43,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\</OutputDirectory>
-          <OutputName>led</OutputName>
+          <OutputName>Bigwork1</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -170,7 +170,7 @@
           <Target51Misc>
             <MemoryModel>0</MemoryModel>
             <RTOS>0</RTOS>
-            <RomSize>2</RomSize>
+            <RomSize>1</RomSize>
             <DataHold>0</DataHold>
             <XDataHold>0</XDataHold>
             <UseOnchipRom>0</UseOnchipRom>
@@ -370,6 +370,11 @@
               <FileName>LightGate.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\LightGate.c</FilePath>
+            </File>
+            <File>
+              <FileName>DigitalTube.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\DigitalTube.c</FilePath>
             </File>
           </Files>
         </Group>
