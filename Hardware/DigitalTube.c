@@ -11,6 +11,7 @@ unsigned char LedBuff[2]={
 void InitDigitalTube()
 {
     EA = 1;
+	P0=0xFF;
 	DISABLELED = 0;
 	ADDR3 = 1;
 	TMOD |= 0x10;

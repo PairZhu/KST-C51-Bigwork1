@@ -197,6 +197,7 @@ void showTime()
 		LcdShowStr(0,1,"t:");
 		LcdShowStr(2,1,str);
 		LcdShowStr(2+num_len,1,"s");
+		P0=0xFF;
 		DISABLELED = 0;
 		delay(20);
 	}
@@ -212,6 +213,7 @@ void showResult()
 	LcdShowStr(0,0,"T=");
 	LcdShowStr(2,0,str);
 	LcdShowStr(2+num,0,"ms");
+	P0=0xFF;
 	DISABLELED = 0;
 }
 /*正浮点数转字符串，返回字符串长度，不在末尾加'\0'*/
