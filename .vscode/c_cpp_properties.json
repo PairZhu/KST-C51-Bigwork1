@@ -3,9 +3,9 @@
         {
             "name": "Target 1",
             "includePath": [
-                "c:\\Users\\Lenovo\\Desktop\\LED\\Hardware",
+                "c:\\Users\\Lenovo\\Desktop\\单片机第一次大作业\\KST-C51-Bigwork1\\Hardware",
                 "C:\\Keil\\C51\\INC",
-                "c:\\Users\\Lenovo\\Desktop\\LED"
+                "c:\\Users\\Lenovo\\Desktop\\单片机第一次大作业\\KST-C51-Bigwork1"
             ],
             "defines": [
                 "__C51__",
