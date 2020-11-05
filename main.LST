@@ -1,0 +1,316 @@
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 1   
+
+
+C51 COMPILER V9.02, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE INCDIR(.\Hardware) DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include "KeyBoard.h"
+   3          #include "LightGate.h"
+   4          #include "TimeCounter.h"
+   5          #include "LCD1602.h"
+   6          #include "DigitalTube.h"
+   7          
+   8          #ifndef __U_8_16__
+              #define __U_8_16__
+              typedef unsigned char u8;
+              typedef unsigned int u16;
+              #endif
+  13          
+  14          sbit BUZZ = P1^6;
+  15          u8 Total;
+  16          double param_a_mm, param_b_mm, param_H_mm, param_M_g, param_g, Period;
+  17          bit MeasureFlag = 0,    //测量完成标志
+  18                  BuzzFlag = 0;   //蜂鸣器振荡标志
+  19          
+  20          void readParam();
+  21          void showResult();
+  22          void showTime();
+  23          void delay(u8);
+  24          u8 uftoa(char* , double, u8);
+  25          
+  26          void main()
+  27          {
+  28   1              readParam();
+  29   1              InitDigitalTube();
+  30   1              InitTimeCounter();
+  31   1              InitLightGate();
+  32   1              showTime();
+  33   1              showResult();
+  34   1              while(1);
+  35   1      }
+  36          
+  37          void delay(u8 ms)
+  38          {
+  39   1              u8 i=ms<<1, j=113;
+  40   1              do
+  41   1              {
+  42   2                      while (--j);
+  43   2              } while (--i);
+  44   1      }
+  45          
+  46          void readParam()
+  47          {
+  48   1              u8 state=0, key, len=0, max_len=10;
+  49   1              unsigned char* tip_str;
+  50   1              bit right_range=0;
+  51   1              unsigned long num=0;
+  52   1              InitLcd1602(1);
+  53   1              LcdShowStr(0,0,"NumberOfPeriods:");
+  54   1              LcdSetCursor(0,1);
+  55   1              while(1)
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 2   
+
+  56   1              {
+  57   2                      if (key = readKey())
+  58   2                      {
+  59   3                              if (key >= '0' && key <= '9' && len < max_len && state<6)
+  60   3                              {
+  61   4                                      LcdWriteDat(key);
+  62   4                                      ++len;
+  63   4                                      num=num*10 + (key - '0');
+  64   4                                      continue;
+  65   4                              }
+  66   3                              switch (key)
+  67   3                              {
+  68   4                              case ESC:
+  69   4                                      if (len > 0)
+  70   4                                      {
+  71   5                                              --len;
+  72   5                                              num/=10;
+  73   5                                              LcdSetCursor(len, 1);
+  74   5                                              LcdWriteDat(' ');
+  75   5                                              LcdSetCursor(len, 1);
+  76   5                                      }
+  77   4                                      break;
+  78   4                              case ENTER:
+  79   4                                      right_range=0;
+  80   4                                      switch (state)
+  81   4                                      {
+  82   5                                      case 0://输入周期数
+  83   5                                              if (num<=99 && num>=1)
+  84   5                                              {
+  85   6                                                      right_range=1;
+  86   6                                                      Total=num;
+  87   6                                                      tip_str="100*a(mm):";
+  88   6                                              }
+  89   5                                              else
+  90   5                                              {
+  91   6                                                      tip_str="OutOfRange:1-99";
+  92   6                                              }
+  93   5                                              break;
+  94   5                                      case 1://输入上圆盘悬线孔构成的三角形边长a
+  95   5                                              if (num>=1)
+  96   5                                              {
+  97   6                                                      right_range=1;
+  98   6                                                      param_a_mm=num/100.0;
+  99   6                                                      tip_str="100*b(mm):";
+ 100   6                                              }
+ 101   5                                              else
+ 102   5                                              {
+ 103   6                                                      tip_str="OutOfRange:a>0";
+ 104   6                                              }
+ 105   5                                              break;
+ 106   5                                      case 2://输入下圆盘悬线孔构成的三角形边长b
+ 107   5                                              if (num>=1)
+ 108   5                                              {
+ 109   6                                                      right_range=1;
+ 110   6                                                      param_b_mm=num/100.0;
+ 111   6                                                      tip_str="100*H(mm):";
+ 112   6                                              }
+ 113   5                                              else
+ 114   5                                              {
+ 115   6                                                      tip_str="OutOfRange:b>0";
+ 116   6                                              }
+ 117   5                                              break;
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 3   
+
+ 118   5                                      case 3://输入上、下圆盘之间的距离H
+ 119   5                                              if (num>=1)
+ 120   5                                              {
+ 121   6                                                      right_range=1;
+ 122   6                                                      param_H_mm=num/100.0;
+ 123   6                                                      tip_str="100*M(g):";
+ 124   6                                              }
+ 125   5                                              else
+ 126   5                                              {
+ 127   6                                                      tip_str="OutOfRange:H>0";
+ 128   6                                              }
+ 129   5                                              break;
+ 130   5                                      case 4://输入被转动物体总质量M
+ 131   5                                              if (num>=1)
+ 132   5                                              {
+ 133   6                                                      right_range=1;
+ 134   6                                                      param_M_g=num/100.0;
+ 135   6                                                      tip_str="100*g(m/s2):";
+ 136   6                                              }
+ 137   5                                              else
+ 138   5                                              {
+ 139   6                                                      tip_str="OutOfRange:M>0";
+ 140   6                                              }
+ 141   5                                              break;
+ 142   5                                      case 5://输入重力加速度g
+ 143   5                                              if (num>=1)
+ 144   5                                              {
+ 145   6                                                      right_range=1;
+ 146   6                                                      param_g=num/100.0;
+ 147   6                                                      InitLcd1602(0);
+ 148   6                                                      tip_str="EnterToBegin...";
+ 149   6                                              }
+ 150   5                                              else
+ 151   5                                              {
+ 152   6                                                      tip_str="OutOfRange:g>0";
+ 153   6                                              }
+ 154   5                                              break;
+ 155   5                                      case 6://准备开始测量
+ 156   5                                              LcdClear();
+ 157   5                                              LcdShowStr(0,0,"Measuring...");
+ 158   5                                              return;
+ 159   5                                      }
+ 160   4                                      if(right_range)
+ 161   4                                      {
+ 162   5                                              ++state;
+ 163   5                                              LcdClear();
+ 164   5                                              LcdShowStr(0,0,tip_str);
+ 165   5                                              LcdSetCursor(0,1);
+ 166   5                                              if(state == 5)
+ 167   5                                              {
+ 168   6                                                      num = 980;
+ 169   6                                                      len = 3;
+ 170   6                                                      LcdShowStr(0,1,"980");
+ 171   6                                              }
+ 172   5                                              else
+ 173   5                                              {
+ 174   6                                                      num = 0;
+ 175   6                                                      len = 0;
+ 176   6                                              }
+ 177   5                                      }
+ 178   4                                      else
+ 179   4                                      {
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 4   
+
+ 180   5                                              LcdShowStr(0,0,tip_str);
+ 181   5                                              LcdSetCursor(len, 1);
+ 182   5                                      }
+ 183   4                                      break;
+ 184   4                              }
+ 185   3                      }
+ 186   2                      delay(2);
+ 187   2              }
+ 188   1      }
+ 189          
+ 190          void showTime()
+ 191          {
+ 192   1              u8 num_len,str[20]={0};
+ 193   1              while(!MeasureFlag)
+ 194   1              {
+ 195   2                      num_len=uftoa(str,(50 * cnt50ms + (double)((TH0 << 8 | TL0) - (H50MS << 8 | L50MS)) * 0.001085)/1000,2);
+ 196   2                      DISABLELED = 1; //禁用,以免操作影响液晶屏
+ 197   2                      LcdShowStr(0,1,"t:");
+ 198   2                      LcdShowStr(2,1,str);
+ 199   2                      LcdShowStr(2+num_len,1,"s");
+ 200   2                      DISABLELED = 0;
+ 201   2                      delay(20);
+ 202   2              }
+ 203   1      }
+ 204          
+ 205          void showResult()
+ 206          {
+ 207   1              u8 num,str[20]={0};
+ 208   1              double J_gcm2;
+ 209   1              DISABLELED = 1;
+ 210   1              num=uftoa(str,Period,3);
+ 211   1              LcdClear();
+ 212   1              LcdShowStr(0,0,"T=");
+ 213   1              LcdShowStr(2,0,str);
+ 214   1              LcdShowStr(2+num,0,"ms");
+ 215   1              DISABLELED = 0;
+ 216   1      }
+*** WARNING C280 IN LINE 208 OF MAIN.C: 'J_gcm2': unreferenced local variable
+ 217          /*正浮点数转字符串，返回字符串长度，不在末尾加'\0'*/
+ 218          u8 uftoa(char* dst, double num, u8 fs)
+ 219          {
+ 220   1              u8 i, chars_cnt, digits = 3;    //至少3位
+ 221   1              unsigned long factor = 10, temp; //因数多10倍，以便四舍五入
+ 222   1              for (i = 0; i != fs; ++i, factor *= 10);
+ 223   1              factor *= num;
+ 224   1              if (factor % 10 >= 5) //四舍五入
+ 225   1                      factor += 10;
+ 226   1              factor /= 10;
+ 227   1              for (temp = factor; temp > 999; temp /= 10, ++digits);  //计算转为整数后的位数
+ 228   1              chars_cnt = digits + 1;
+ 229   1              for (i = 0; i != chars_cnt - 1; ++i)
+ 230   1              {
+ 231   2                      if (i == fs)
+ 232   2                              dst[digits--] = '.';
+ 233   2                      dst[digits--] = factor % 10 + '0';
+ 234   2                      factor /= 10;
+ 235   2              }
+ 236   1              return chars_cnt;
+ 237   1      }
+ 238          /*
+ 239          u8 utoa(char *dst, u16 num)
+ 240          {
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 5   
+
+ 241                  u8 i, chars_cnt, digits = 1;
+ 242                  u16 temp;
+ 243                  for (temp = num; temp > 9; temp /= 10, ++digits);
+ 244                  chars_cnt=digits;
+ 245                  while (digits)
+ 246                  {
+ 247                          dst[--digits]=num%10+'0';
+ 248                          num /= 10;
+ 249                  }
+ 250                  return chars_cnt;
+ 251          }
+ 252          */
+ 253          void InterruptTime2() interrupt 3
+ 254          {
+ 255   1          static u8 i = 0, buzz_cnt = 0;
+ 256   1          TH1 = 0xFC;
+ 257   1          TL1 = 0x67;
+ 258   1          if(BuzzFlag)
+ 259   1              {
+ 260   2                      BUZZ=~BUZZ;
+ 261   2                      ++buzz_cnt;
+ 262   2                      if(buzz_cnt==100)
+ 263   2                      {
+ 264   3                              BuzzFlag=0;
+ 265   3                              buzz_cnt=0;
+ 266   3                      }
+ 267   2              }
+ 268   1              if(DISABLELED) return;
+ 269   1          P0 = 0xFF;
+ 270   1          ADDR2 = 0;
+ 271   1          ADDR1 = 0;
+ 272   1          switch (i)
+ 273   1          {
+ 274   2          case 0:
+ 275   2              ADDR0 = 0;
+ 276   2              break;
+ 277   2          case 1:
+ 278   2              ADDR0 = 1;
+ 279   2              break;
+ 280   2          }
+ 281   1          P0 = LedBuff[i++];
+ 282   1          if(i==2)
+ 283   1              i=0;
+ 284   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1522    ----
+   CONSTANT SIZE    =    248    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     27      76
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

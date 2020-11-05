@@ -1,0 +1,53 @@
+C51 COMPILER V9.02   LIGHTGATE                                                             11/05/2020 22:18:27 PAGE 1   
+
+
+C51 COMPILER V9.02, COMPILATION OF MODULE LIGHTGATE
+OBJECT MODULE PLACED IN LightGate.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Hardware\LightGate.c BROWSE INCDIR(.\Hardware) DEBUG OBJECTEXTEND PRINT(.\L
+                    -ightGate.lst) OBJECT(LightGate.obj)
+
+line level    source
+
+   1          #include "LightGate.h"
+   2          
+   3          void InitLightGate()
+   4          {
+   5   1          EA = 1;
+   6   1              IT1 = 1; //设置外部中断1为下降沿触发
+   7   1          EX1 = 1; //启用外部中断1
+   8   1              showNumber(Total);
+   9   1      }
+  10          
+  11          void Extern1() interrupt 2
+  12          {
+  13   1          static u8 cnt = 0;
+  14   1          ++cnt;
+  15   1              BuzzFlag = 1;
+  16   1              showNumber(Total-(cnt-1>>1));
+  17   1          if (cnt == 1)
+  18   1          {
+  19   2              startTimeCounter();
+  20   2              return;
+  21   2          }
+  22   1          if (cnt == Total * 2 + 1)
+  23   1          {
+  24   2                      stopTimeCounter();
+  25   2                      Period = (50 * cnt50ms + (double)((TH0 << 8 | TL0) - (H50MS << 8 | L50MS)) * 0.001085)/Total;
+  26   2                      EX1 = 0;//关闭外部中断
+  27   2                      MeasureFlag = 1;//标志测量完成;
+  28   2          }
+  29   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    232    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
