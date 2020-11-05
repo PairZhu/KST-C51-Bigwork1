@@ -1,4 +1,4 @@
-C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 1   
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:42:01 PAGE 1   
 
 
 C51 COMPILER V9.02, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   53   1              LcdShowStr(0,0,"NumberOfPeriods:");
   54   1              LcdSetCursor(0,1);
   55   1              while(1)
-C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 2   
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:42:01 PAGE 2   
 
   56   1              {
   57   2                      if (key = readKey())
@@ -126,7 +126,7 @@ line level    source
  115   6                                                      tip_str="OutOfRange:b>0";
  116   6                                              }
  117   5                                              break;
-C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 3   
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:42:01 PAGE 3   
 
  118   5                                      case 3://输入上、下圆盘之间的距离H
  119   5                                              if (num>=1)
@@ -190,7 +190,7 @@ line level    source
  177   5                                      }
  178   4                                      else
  179   4                                      {
-C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 4   
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:42:01 PAGE 4   
 
  180   5                                              LcdShowStr(0,0,tip_str);
  181   5                                              LcdSetCursor(len, 1);
@@ -254,7 +254,7 @@ line level    source
  238          /*
  239          u8 utoa(char *dst, u16 num)
  240          {
-C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:18:26 PAGE 5   
+C51 COMPILER V9.02   MAIN                                                                  11/05/2020 22:42:01 PAGE 5   
 
  241                  u8 i, chars_cnt, digits = 1;
  242                  u16 temp;
