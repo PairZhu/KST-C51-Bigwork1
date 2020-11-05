@@ -45,13 +45,13 @@ void delay(u8 ms)
 
 void readParam()
 {
-	u8 state=0, key, len=0, max_len=10;
+	u8 state=0, key, len=2, max_len=10;
 	unsigned char* tip_str;
 	bit right_range=0;
-	unsigned long num=0;
+	unsigned long num=10;
 	InitLcd1602(1);
 	LcdShowStr(0,0,"NumberOfPeriods:");
-	LcdSetCursor(0,1);
+	LcdShowStr(0,1,"10");
 	while(1)
 	{
 		if (key = readKey())
