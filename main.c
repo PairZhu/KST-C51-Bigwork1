@@ -221,12 +221,12 @@ void showResult()
 	P0=0xFF;
 	DISABLELED = 0;
 	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*10e9*param_H_mm);
-	num_len=uftoa(str,Period,4);
+	num_len=uftoa(str,J_gm2,4);
 	str[num_len]='\0';
 	DISABLELED = 1;
 	LcdShowStr(0,1,"J=");
 	LcdShowStr(2,1,str);
-	LcdShowStr(2+num_len,0,"g*m2");
+	LcdShowStr(2+num_len,1,"g*m2");
 	P0=0xFF;
 	DISABLELED = 0;
 }
