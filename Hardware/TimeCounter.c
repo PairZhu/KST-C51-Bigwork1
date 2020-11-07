@@ -1,12 +1,13 @@
 #include "TimeCounter.h"
 
-u16 cnt50ms = 0; //储存经过多少个50ms
+unsigned long cnt50ms = 0; //储存经过多少个50ms
 
 void InitTimeCounter()
 {
     EA=1;
+	
 	TMOD |= 0x1; //设置定时器0为模式1
-	cnt50ms = 0;
+	cnt50ms = 0; //重置50毫秒溢出计次
 	TL0 = L50MS; //设置定时初值
 	TH0 = H50MS;
 	ET0 = 1; //使能定时器0中断

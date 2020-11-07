@@ -18,6 +18,7 @@ extern u8 Total;
 extern double Period;
 extern bit MeasureFlag;
 extern bit BuzzFlag;
+extern bit ErrorFlag;
 
 void InitLightGate();
 

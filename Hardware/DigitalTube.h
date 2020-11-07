@@ -14,8 +14,8 @@ sbit ADDR1 = P1^1;
 sbit ADDR2 = P1^2;
 sbit ADDR3 = P1^3;
 sbit DISABLELED = P1^4;
-extern unsigned char LedBuff[];
-extern unsigned char code LedChar[];
+extern u8 LedBuff[];
+extern u8 LedChar[];
 
 void InitDigitalTube();
 void showNumber(u8);

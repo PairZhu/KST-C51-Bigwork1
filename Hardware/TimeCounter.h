@@ -16,6 +16,6 @@ void InitTimeCounter();
 void startTimeCounter();
 void stopTimeCounter();
 
-extern u16 cnt50ms;
+extern unsigned long cnt50ms;
 
 #endif // !__TimeCounter_h__

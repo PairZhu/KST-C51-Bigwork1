@@ -12,19 +12,25 @@ typedef unsigned int u16;
 #endif
 
 #define PI 3.141592653589793
+#define MAX_LEN 10
 
 sbit BUZZ = P1^6;
 
 u8 Total;
 double param_a_mm, param_b_mm, param_H_mm, param_M_g, param_g, Period;
 bit MeasureFlag = 0,	//测量完成标志
-	BuzzFlag = 0;	//蜂鸣器振荡标志
+	BuzzFlag = 0,	//蜂鸣器振荡标志
+	ErrorFlag = 0;	//测量失误标志
+
+u8 Image[8]={0xE7,0xE7,0xE7,0xE7,0xE7,0xFF,0xE7,0xE7};
 
 void readParam();
 void showResult();
 void showTime();
 void delay(u8);
-u8 uftoa(char* , double, u8);
+void RereadM();
+u8 uftoa(u8*, double, u8);
+u8 utoa(char*, unsigned long);
 
 void main()
 {
@@ -34,7 +40,30 @@ void main()
 	InitLightGate();
 	showTime();
 	showResult();
-	while(1);
+	while(1) //多次测量
+	{
+		if (readKey()==ENTER)
+		{
+			DISABLELED=1;
+			ErrorFlag=0;
+			MeasureFlag=0;
+			RereadM();
+			InitLcd1602(0);
+			LcdShowStr(0,0,"EnterToBegin...");
+			do
+			{
+				delay(2);
+			} while (readKey()!=ENTER);
+			LcdClear();
+			LcdShowStr(0,0,"Measuring...");
+			InitDigitalTube();
+			InitTimeCounter();
+			InitLightGate();
+			showTime();
+			showResult();
+		}
+		delay(2);
+	}
 }
 
 void delay(u8 ms)
@@ -46,9 +75,60 @@ void delay(u8 ms)
 	} while (--i);
 }
 
+void RereadM()
+{
+	u8 key, len;
+	u8 str[20];
+	unsigned long num=param_M_g*100;
+	len=utoa(str,num);
+	str[len]=0;
+	InitLcd1602(1);
+	LcdShowStr(0,0,"100*M(g):");
+	LcdShowStr(0,1,str);
+	while(1)
+	{
+		if (key = readKey())
+		{
+			if (key >= '0' && key <= '9' && len < MAX_LEN)
+			{
+				LcdWriteDat(key);
+				++len;
+				num=num*10 + (key - '0');
+				continue;
+			}
+			switch (key)
+			{
+			case ESC:
+				if (len > 0)
+				{
+					--len;
+					num/=10;
+					LcdSetCursor(len, 1);
+					LcdWriteDat(' ');
+					LcdSetCursor(len, 1);
+				}
+				break;
+			case ENTER:
+				if (num>=1)
+				{
+					param_M_g=num/100.0;
+					return;
+				}
+				else
+				{
+					LcdShowStr(0,0,"OutOfRange:M>0");
+					LcdSetCursor(len,1);
+				}
+			}
+		}
+		delay(2);
+	}
+
+}
+
 void readParam()
 {
-	u8 state=0, key, len=2, max_len=10;
+	u8 state=0, key, len=2;
 	unsigned long num=10;
 	InitLcd1602(1);
 	LcdShowStr(0,0,"NumberOfPeriods:");
@@ -57,7 +137,7 @@ void readParam()
 	{
 		if (key = readKey())
 		{
-			if (key >= '0' && key <= '9' && len < max_len && state<6)
+			if (key >= '0' && key <= '9' && len < MAX_LEN && state<6)
 			{
 				LcdWriteDat(key);
 				++len;
@@ -221,7 +301,8 @@ void showResult()
 	LcdShowStr(2+num_len,0,"ms");
 	P0=0xFF;
 	DISABLELED = 0;
-	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*1e12*param_H_mm);
+	//		500		*	9800	* 50  *	150	*    1000	*  1000	/(12*3.14*3.14*1e12*500)	
+	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*1e12*param_H_mm);//96191
 	num_len=uftoa(str,J_gm2,4);
 	str[num_len]='\0';
 	DISABLELED = 1;
@@ -232,16 +313,18 @@ void showResult()
 	DISABLELED = 0;
 }
 /*正浮点数转字符串，返回字符串长度，不在末尾加'\0'*/
-u8 uftoa(char* dst, double num, u8 fs)
+u8 uftoa(u8* dst, double num, u8 fs)
 {
-	u8 i, chars_cnt, digits = 3;	//至少3位
+	u8 i, chars_cnt, digits = 0;
 	unsigned long factor = 10, temp; //因数多10倍，以便四舍五入
 	for (i = 0; i != fs; ++i, factor *= 10);
 	factor *= num;
 	if (factor % 10 >= 5) //四舍五入
 		factor += 10;
 	factor /= 10;
-	for (temp = factor; temp > 999; temp /= 10, ++digits);	//计算转为整数后的位数
+	for (temp = factor; temp > 0; temp /= 10, ++digits);	//计算转为整数后的位数
+	if (digits < fs + 1)
+		digits = fs + 1;
 	chars_cnt = digits + 1;
 	for (i = 0; i != chars_cnt - 1; ++i)
 	{
@@ -252,11 +335,11 @@ u8 uftoa(char* dst, double num, u8 fs)
 	}
 	return chars_cnt;
 }
-/*
-u8 utoa(char *dst, u16 num)
+
+u8 utoa(char *dst, unsigned long num)
 {
-	u8 i, chars_cnt, digits = 1;
-	u16 temp;
+	u8 chars_cnt, digits = 1;
+	unsigned long temp;
 	for (temp = num; temp > 9; temp /= 10, ++digits);
 	chars_cnt=digits;
 	while (digits)
@@ -266,36 +349,77 @@ u8 utoa(char *dst, u16 num)
 	}
 	return chars_cnt;
 }
-*/
+
 void InterruptTime2() interrupt 3
 {
-    static u8 i = 0, buzz_cnt = 0;
-    TH1 = 0xFC;
-    TL1 = 0x67;
+    static u8 i = 0, buzz_cnt = 50;
+	static bit handled_error = 0;
+    TH1 = 0xFE;
+    TL1 = 0x32;
+	if(ErrorFlag)
+	{
+		if(!handled_error)
+		{
+			buzz_cnt=255;
+			handled_error = 1;
+		}
+	}
+	else
+	{
+		handled_error = 0;
+	}
     if(BuzzFlag)
 	{
 		BUZZ=~BUZZ;
-		++buzz_cnt;
-		if(buzz_cnt==100)
+		--buzz_cnt;
+		if(buzz_cnt==0)
 		{
 			BuzzFlag=0;
-			buzz_cnt=0;
+			buzz_cnt=25;
 		}
 	}
 	if(DISABLELED) return;
     P0 = 0xFF;
-    ADDR2 = 0;
-    ADDR1 = 0;
     switch (i)
     {
-    case 0:
-        ADDR0 = 0;
+	case 0:
+		ADDR3 = 0; ADDR2=0; ADDR1=0; ADDR0=0;
+		break;
+	case 1:
+		ADDR2=0; ADDR1=0; ADDR0=1;
+		break;
+	case 2:
+		ADDR2=0; ADDR1=1; ADDR0=0;
+		break;
+	case 3:
+		ADDR2=0; ADDR1=1; ADDR0=1;
+		break;
+	case 4:
+		ADDR2=1; ADDR1=0; ADDR0=0;
+		break;
+	case 5:
+		ADDR2=1; ADDR1=0; ADDR0=1;
+		break;
+	case 6:
+		ADDR2=1; ADDR1=1; ADDR0=0;
+		break;
+	case 7:
+		ADDR2=1; ADDR1=1; ADDR0=1;
+		break;
+    case 8:
+        ADDR0 = 0; ADDR1 = 0; ADDR2 = 0; ADDR3 = 1;
         break;
-    case 1:
-        ADDR0 = 1;
+    case 9:
+        ADDR0 = 1; ADDR1 = 0; ADDR2 = 0;
         break;
+		
     }
-    P0 = LedBuff[i++];
-    if(i==2)
+	if(i>7)
+    	P0 = LedBuff[i-8];
+	else if(ErrorFlag)
+		P0 = Image[i];
+	++i;
+    if(i==10)
         i=0;
+		
 }
