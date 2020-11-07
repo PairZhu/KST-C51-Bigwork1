@@ -49,8 +49,6 @@ void delay(u8 ms)
 void readParam()
 {
 	u8 state=0, key, len=2, max_len=10;
-	unsigned char* tip_str;
-	bit right_range=0;
 	unsigned long num=10;
 	InitLcd1602(1);
 	LcdShowStr(0,0,"NumberOfPeriods:");
@@ -79,109 +77,112 @@ void readParam()
 				}
 				break;
 			case ENTER:
-				right_range=0;
 				switch (state)
 				{
 				case 0://输入周期数
 					if (num<=99 && num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						Total=num;
-						tip_str="100*a(mm):";
+						LcdShowStr(0,0,"100*a(mm):");
+						num=5000;
+						len=4;
+						LcdShowStr(0,1,"5000");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:1-99";
+						LcdShowStr(0,0,"OutOfRange:1-99");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 1://输入上圆盘悬线孔构成的三角形边长a
 					if (num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						param_a_mm=num/100.0;
-						tip_str="100*b(mm):";
+						LcdShowStr(0,0,"100*b(mm):");
+						num=15000;
+						len=5;
+						LcdShowStr(0,1,"15000");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:a>0";
+						LcdShowStr(0,0,"OutOfRange:a>0");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 2://输入下圆盘悬线孔构成的三角形边长b
 					if (num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						param_b_mm=num/100.0;
-						tip_str="100*H(mm):";
+						LcdShowStr(0,0,"100*H(mm):");
+						num=50000;
+						len=5;
+						LcdShowStr(0,1,"50000");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:b>0";
+						LcdShowStr(0,0,"OutOfRange:b>0");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 3://输入上、下圆盘之间的距离H
 					if (num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						param_H_mm=num/100.0;
-						tip_str="100*M(g):";
+						LcdShowStr(0,0,"100*M(g):");
+						num=50000;
+						len=5;
+						LcdShowStr(0,1,"50000");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:H>0";
+						LcdShowStr(0,0,"OutOfRange:H>0");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 4://输入被转动物体总质量M
 					if (num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						param_M_g=num/100.0;
-						tip_str="100*g(m/s2):";
+						LcdShowStr(0,0,"100*g(mm/s2):");
+						num=980000;
+						len=6;
+						LcdShowStr(0,1,"980000");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:M>0";
+						LcdShowStr(0,0,"OutOfRange:M>0");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 5://输入重力加速度g
 					if (num>=1)
 					{
-						right_range=1;
+						LcdClear();
 						param_g=num/100.0;
 						InitLcd1602(0);
-						tip_str="EnterToBegin...";
+						LcdShowStr(0,0,"EnterToBegin...");
+						++state;
 					}
 					else
 					{
-						tip_str="OutOfRange:g>0";
+						LcdShowStr(0,0,"OutOfRange:g>0");
+						LcdSetCursor(len,1);
 					}
 					break;
 				case 6://准备开始测量
 					LcdClear();
 					LcdShowStr(0,0,"Measuring...");
 					return;
-				}
-				if(right_range)
-				{
-					++state;
-					LcdClear();
-					LcdShowStr(0,0,tip_str);
-					LcdSetCursor(0,1);
-					if(state == 5)
-					{
-						num = 980;
-						len = 3;
-						LcdShowStr(0,1,"980");
-					}
-					else
-					{
-						num = 0;
-						len = 0;
-					}
-				}
-				else
-				{
-					LcdShowStr(0,0,tip_str);
-					LcdSetCursor(len, 1);
 				}
 				break;
 			}
@@ -195,12 +196,12 @@ void showTime()
 	u8 num_len,str[20];
 	while(!MeasureFlag)
 	{
-		num_len=uftoa(str,(50 * cnt50ms + (double)((TH0 << 8 | TL0) - (H50MS << 8 | L50MS)) * 0.001085)/1000,2);
+		num_len=uftoa(str,CurrentTime/1000,2);
 		str[num_len]='\0';
 		DISABLELED = 1;	//禁用,以免操作影响液晶屏
-		LcdShowStr(0,1,"t:");
-		LcdShowStr(2,1,str);
-		LcdShowStr(2+num_len,1,"s");
+		LcdShowStr(0,1,"Sec:");
+		LcdShowStr(4,1,str);
+		LcdShowStr(4+num_len,1,"s");
 		P0=0xFF;
 		DISABLELED = 0;
 		delay(20);
@@ -220,7 +221,7 @@ void showResult()
 	LcdShowStr(2+num_len,0,"ms");
 	P0=0xFF;
 	DISABLELED = 0;
-	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*10e9*param_H_mm);
+	J_gm2=param_M_g*param_g*param_a_mm*param_b_mm*Period*Period/(12*PI*PI*1e12*param_H_mm);
 	num_len=uftoa(str,J_gm2,4);
 	str[num_len]='\0';
 	DISABLELED = 1;

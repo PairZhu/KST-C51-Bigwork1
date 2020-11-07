@@ -22,7 +22,7 @@ void Extern1() interrupt 2
     if (cnt == Total * 2 + 1)
     {
 		stopTimeCounter();
-		Period = (50 * cnt50ms + (double)((TH0 << 8 | TL0) - (H50MS << 8 | L50MS)) * 0.001085)/Total;
+		Period = CurrentTime/Total;
 		EX1 = 0;//关闭外部中断
 		MeasureFlag = 1;//标志测量完成;
     }
